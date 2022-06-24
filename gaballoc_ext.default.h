@@ -1,3 +1,5 @@
+// RENAME TO "gaballoc_ext.h"
+
 #ifndef LIBK_GABALLOC_EXT_H
 #define LIBK_GABALLOC_EXT_H 1
 
