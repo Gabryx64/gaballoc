@@ -13,13 +13,13 @@
 slab_t* NOOPT small_slab_create(size_t size, size_t align, slab_t* prev, slab_t* next)
 {
 	void* mem = GABALLOC_ALLOC(1);
-	slab_t* ret = mem + 4096 - sizeof(slab_t);
+	slab_t* ret = mem + GABALLOC_PAGE_SIZE - sizeof(slab_t);
 	ret->prev = prev ? prev : ret;
 	ret->next = next ? next : ret;
 	ret->refcount = 0;
 	ret->firstbuf = (bufctl_t*)mem;
 	
-	ret->maxrefs = (4096 - sizeof(slab_t)) / (sizeof(bufctl_t) + align);
+	ret->maxrefs = (GABALLOC_PAGE_SIZE - sizeof(slab_t)) / (sizeof(bufctl_t) + align);
 	bufctl_t* last = (bufctl_t*)mem;
 	for(size_t i = 0; i < ret->maxrefs; i++)
 	{
@@ -86,13 +86,13 @@ void NOOPT small_slab_free(void* ptr)
 slab_t* NOOPT large_slab_create(size_t size, size_t align, slab_t* prev, slab_t* next)
 {
 	void* mem = GABALLOC_ALLOC(1);
-	slab_t* ret = mem + 4096 - sizeof(slab_t);
+	slab_t* ret = mem + GABALLOC_PAGE_SIZE - sizeof(slab_t);
 	ret->prev = prev ? prev : ret;
 	ret->next = next ? next : ret;
 	ret->refcount = 0;
 	ret->firstbuf = (bufctl_t*)mem;
 	
-	ret->maxrefs = (4096 - sizeof(slab_t)) / sizeof(bufctl_t);
+	ret->maxrefs = (GABALLOC_PAGE_SIZE - sizeof(slab_t)) / sizeof(bufctl_t);
 	bufctl_t* last = (bufctl_t*)mem;
 	for(size_t i = 0; i < ret->maxrefs; i++)
 	{
@@ -168,7 +168,7 @@ cache_t* cache_create(size_t size, size_t align, void (*constructor)(void* ptr, 
 {
 	GABALLOC_LOCK();
 
-	cache_t* ret = GABALLOC_ALLOC(DIV_RNDUP(sizeof(cache_t) + size, 4096));
+	cache_t* ret = GABALLOC_ALLOC(DIV_RNDUP(sizeof(cache_t) + size, GABALLOC_PAGE_SIZE));
 	ret->size = size;
 	ret->align = align < size ? size : align;
 	ret->large = align >= (GABALLOC_PAGE_SIZE / 8);
